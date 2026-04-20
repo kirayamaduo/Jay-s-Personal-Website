@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图 4-1 系统功能模块结构图</title>
+    <style>
+        :root {
+            --root-bg: #1e3a8a;       /* Dark Blue */
+            --subsystem-bg: #3b82f6;  /* Blue */
+            --module-bg: #ffffff;     /* White */
+            --module-border: #60a5fa; /* Light Blue */
+            --line-color: #94a3b8;    /* Slate */
+            --text-white: #ffffff;
+            --text-dark: #1e293b;
+        }
+
+        body {
+            font-family: 'SimSun', '宋体', 'Microsoft YaHei', sans-serif;
+            background-color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .diagram-container {
+            width: 900px;
+            background-color: white;
+            padding: 40px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .diagram-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+            color: var(--text-dark);
+            margin-top: 30px;
+            font-family: '黑体', 'SimHei', sans-serif;
+        }
+
+        /* Tree Layout */
+        .tree {
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .level-1 {
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .level-2-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 100px; /* Space between subsystems */
+            position: relative;
+            width: 100%;
+        }
+
+        .level-3-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 15px; /* Space between modules */
+            margin-top: 30px;
+            position: relative;
+        }
+
+        /* Nodes */
+        .node {
+            padding: 12px 20px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 2;
+        }
+
+        .node-root {
+            background-color: var(--root-bg);
+            color: var(--text-white);
+            font-size: 16px;
+            width: 200px;
+        }
+
+        .node-subsystem {
+            background-color: var(--subsystem-bg);
+            color: var(--text-white);
+            font-size: 14px;
+            width: 160px;
+        }
+
+        .node-module {
+            background-color: var(--module-bg);
+            color: var(--text-dark);
+            border: 2px solid var(--module-border);
+            font-size: 13px;
+            width: 85px; /* Compact width */
+            font-weight: normal;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 50px;
+        }
+
+        /* Connecting Lines (CSS implementation) */
+        
+        /* Line from Root down */
+        .level-1::after {
+            content: '';
+            position: absolute;
+            bottom: -20px; /* Halfway to next level */
+            left: 50%;
+            width: 2px;
+            height: 20px;
+            background-color: var(--line-color);
+        }
+
+        /* Horizontal bar connecting subsystems */
+        .level-2-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 200px; /* Adjust based on gap */
+            right: 200px;
+            height: 2px;
+            background-color: var(--line-color);
+        }
+
+        /* Vertical lines to subsystems */
+        .subsystem-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .subsystem-group::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            width: 2px;
+            height: 20px;
+            background-color: var(--line-color);
+        }
+
+        /* Vertical line from subsystem to module bar */
+        .subsystem-group::after {
+            content: '';
+            position: absolute;
+            top: 40px; /* Height of subsystem node + padding */
+            left: 50%;
+            width: 2px;
+            height: 30px; /* Reach level 3 */
+            background-color: var(--line-color);
+            z-index: 0;
+        }
+
+        /* Horizontal bar for modules */
+        .level-3-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -15px; /* relative to wrapper top */
+            left: 50px; /* Start of first module center */
+            right: 50px; /* End of last module center */
+            height: 2px;
+            background-color: var(--line-color);
+        }
+
+        /* Vertical lines to modules */
+        .module-group {
+            position: relative;
+        }
+
+        .module-group::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            width: 2px;
+            height: 15px;
+            background-color: var(--line-color);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="diagram-container">
+    
+    <div class="tree">
+        
+        <!-- Level 1: Root -->
+        <div class="level-1">
+            <div class="node node-root">个人技术门户系统</div>
+        </div>
+
+        <!-- Level 2: Subsystems -->
+        <div class="level-2-wrapper">
+            
+            <!-- Left Branch -->
+            <div class="subsystem-group">
+                <div class="node node-subsystem">前台展示子系统</div>
+                
+                <!-- Level 3: Modules -->
+                <div class="level-3-wrapper">
+                    <div class="module-group">
+                        <div class="node node-module">首页概览<br>模块</div>
+                    </div>
+                    <div class="module-group">
+                        <div class="node node-module">博客阅读<br>模块</div>
+                    </div>
+                    <div class="module-group">
+                        <div class="node node-module">项目橱窗<br>模块</div>
+                    </div>
+                    <div class="module-group">
+                        <div class="node node-module">评论互动<br>模块</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Branch -->
+            <div class="subsystem-group">
+                <div class="node node-subsystem">后台管理子系统</div>
+                
+                <!-- Level 3: Modules -->
+                <div class="level-3-wrapper">
+                    <div class="module-group">
+                        <div class="node node-module">仪表盘<br>监控</div>
+                    </div>
+                    <div class="module-group">
+                        <div class="node node-module">内容管理<br>中心</div>
+                    </div>
+                    <div class="module-group">
+                        <div class="node node-module">系统配置<br>中心</div>
+                    </div>
+                    <div class="module-group">
+                        <div class="node node-module">安全与<br>日志</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="diagram-title">图 4-1 系统功能模块结构图</div>
+</div>
+
+</body>
+</html>

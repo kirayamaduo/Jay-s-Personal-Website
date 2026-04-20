@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图 4-3 后端三层架构类图</title>
+    <style>
+        :root {
+            --controller-bg: #dbeafe;
+            --controller-border: #3b82f6;
+            --controller-header: #1e40af;
+            --service-bg: #dcfce7;
+            --service-border: #22c55e;
+            --service-header: #166534;
+            --repository-bg: #fef3c7;
+            --repository-border: #f59e0b;
+            --repository-header: #b45309;
+            --entity-bg: #fce7f3;
+            --entity-border: #ec4899;
+            --entity-header: #be185d;
+            --layer-bg: #f8fafc;
+            --layer-border: #cbd5e1;
+            --text-dark: #1e293b;
+            --arrow-color: #64748b;
+        }
+
+        body {
+            font-family: 'SimSun', '宋体', 'Microsoft YaHei', sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .diagram-container {
+            width: 1100px;
+            background-color: white;
+            padding: 30px;
+            border: 1px solid #ccc;
+            position: relative;
+        }
+
+        .diagram-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+            color: var(--text-dark);
+            margin-top: 20px;
+            font-family: '黑体', 'SimHei', sans-serif;
+        }
+
+        .architecture {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 层容器 */
+        .layer {
+            background-color: var(--layer-bg);
+            border: 2px dashed var(--layer-border);
+            border-radius: 8px;
+            padding: 15px;
+            position: relative;
+        }
+
+        .layer-label {
+            position: absolute;
+            left: -2px;
+            top: -2px;
+            background: #475569;
+            color: white;
+            padding: 4px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 6px 0 6px 0;
+        }
+
+        .layer-content {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            padding-top: 10px;
+        }
+
+        /* UML 类框 */
+        .class-box {
+            width: 160px;
+            border: 2px solid;
+            background: white;
+            font-size: 11px;
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .class-header {
+            padding: 6px 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 11px;
+            color: white;
+            border-bottom: 2px solid;
+        }
+
+        .class-stereotype {
+            font-size: 9px;
+            font-weight: normal;
+            font-style: italic;
+        }
+
+        .class-name {
+            font-family: 'Consolas', 'Courier New', monospace;
+        }
+
+        .class-body {
+            padding: 6px 8px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 10px;
+            min-height: 40px;
+        }
+
+        .class-body .method {
+            margin: 2px 0;
+            color: #334155;
+        }
+
+        .class-body .method::before {
+            content: '+';
+            color: #22c55e;
+            margin-right: 3px;
+        }
+
+        /* Controller 样式 */
+        .class-controller {
+            border-color: var(--controller-border);
+        }
+        .class-controller .class-header {
+            background-color: var(--controller-header);
+            border-color: var(--controller-border);
+        }
+        .class-controller .class-body {
+            background-color: var(--controller-bg);
+        }
+
+        /* Service 样式 */
+        .class-service {
+            border-color: var(--service-border);
+        }
+        .class-service .class-header {
+            background-color: var(--service-header);
+            border-color: var(--service-border);
+        }
+        .class-service .class-body {
+            background-color: var(--service-bg);
+        }
+
+        /* Repository 样式 */
+        .class-repository {
+            border-color: var(--repository-border);
+        }
+        .class-repository .class-header {
+            background-color: var(--repository-header);
+            border-color: var(--repository-border);
+        }
+        .class-repository .class-body {
+            background-color: var(--repository-bg);
+        }
+
+        /* Entity 样式 */
+        .class-entity {
+            border-color: var(--entity-border);
+        }
+        .class-entity .class-header {
+            background-color: var(--entity-header);
+            border-color: var(--entity-border);
+        }
+        .class-entity .class-body {
+            background-color: var(--entity-bg);
+        }
+
+        .class-body .field {
+            margin: 2px 0;
+            color: #334155;
+        }
+
+        .class-body .field::before {
+            content: '-';
+            color: #ef4444;
+            margin-right: 3px;
+        }
+
+        /* 层间箭头区域 */
+        .arrow-zone {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 30px;
+            position: relative;
+        }
+
+        .arrow-zone::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 2px;
+            height: 30px;
+            background: var(--arrow-color);
+        }
+
+        .arrow-zone::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            transform: translateX(-50%);
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 10px solid var(--arrow-color);
+        }
+
+        .arrow-label {
+            position: absolute;
+            left: calc(50% + 15px);
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11px;
+            color: var(--arrow-color);
+            white-space: nowrap;
+        }
+
+        /* 图例 */
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border: 2px solid;
+            border-radius: 2px;
+        }
+
+        /* 更多类的省略 */
+        .more-classes {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            border: 2px dashed #94a3b8;
+            border-radius: 4px;
+            color: #64748b;
+            font-size: 11px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="diagram-container">
+    
+    <div class="architecture">
+        
+        <!-- Controller 层 -->
+        <div class="layer">
+            <div class="layer-label">表示层 (Controller)</div>
+            <div class="layer-content">
+                
+                <div class="class-box class-controller">
+                    <div class="class-header">
+                        <div class="class-stereotype">«@RestController»</div>
+                        <div class="class-name">PostController</div>
+                    </div>
+                    <div class="class-body">
+                        <div class="method">getAll()</div>
+                        <div class="method">getById(id)</div>
+                        <div class="method">getBySlug(slug)</div>
+                        <div class="method">getByTag(tag)</div>
+                    </div>
+                </div>
+
+                <div class="class-box class-controller">
+                    <div class="class-header">
+                        <div class="class-stereotype">«@RestController»</div>
+                        <div class="class-name">ProjectController</div>
+                    </div>
+                    <div class="class-body">
+                        <div class="method">getAll()</div>
+                        <div class="method">getById(id)</div>
+                        <div class="method">getFeatured()</div>
+                        <div class="method">getBySlug(slug)</div>
+                    </div>
+                </div>
+
+                <div class="class-box class-controller">
+                    <div class="class-header">
+                        <div class="class-stereotype">«@RestController»</div>
+                        <div class="class-name">CommentController</div>
+                    </div>
+                    <div class="class-body">
+                        <div class="method">getByPostId(id)</div>
+                        <div class="method">create(request)</div>
+                        <div class="method">getCount(postId)</div>
+                    </div>
+                </div>
+
+                <div class="class-box class-controller">
+                    <div class="class-header">
+                        <div class="class-stereotype">«@RestController»</div>
+                        <div class="class-name">AuthController</div>
+                    </div>
+                    <div class="class-body">
+                        <div class="method">login(request)</div>
+                        <div class="method">refresh(token)</div>
+                        <div class="method">logout()</div>
+                        <div class="method">getCurrentUser()</div>
+                    </div>
+                </div>
+
+                <div class="more-classes">
+                    <span>...</span>
+                    <span>+5 Controllers</span>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 箭头区域 1 -->
+        <div class="arrow-zone">
+            <div class="arrow-label">调用 @Autowired 注入</div>
+        </div>
+
+        <!-- Service 层 -->
+        <div class="layer">
+            <div class="layer-label">业务逻辑层 (Service)</div>
+            <div class="layer-content">
+                
+                <div class="class-box class-service">
+                    <div class="class-header">
+                        <div class="class-stereotype">«@Service»</div>
+                        <div class="class-name">PostService</div>
+                    </div>
+                    <div class="class-body">
+                        <div class="method">findAll()</div>
+                        <div class="method">findById(id)</div>
+                        <div class="method">create(dto)</div>
+                        <div class="method">update(id, dto)</div>
+                        <div class="method">delete(id)</div>
+                    </div>
+                </div>
+
+                <div class="class-box class-service">
+                    <div class="class-header">
+                        <div class="class-stereotype">«@Service»</div>
+                        <div class="class-name">ProjectService</div>
+                    </div>
+                    <div class="class-body">
+                        <div class="method">findAll()</div>
+                        <div class="method">findById(id)</div>
+                        <div class="method">findFeatured()</div>
+                        <div class="method">create(dto)</div>
+                        <div class="method">update(id, dto)</div>
+                    </div>
+                </div>
+
+                <div class="class-box class-service">
+                    <div class="class-header">
+                        <div class="class-stereotype">«@Service»</div>
+                        <div class="class-name">CommentService</div>
+                    </div>
+                    <div class="class-body">
+                        <div class="method">findByPostId(id)</div>
+                        <div class="method">create(dto)</div>
+                        <div class="method">approve(id)</div>
+                        <div class="method">markAsSpam(id)</div>
+                    </div>
+                </div>
+
+                <div class="class-box class-service">
+                    <div class="class-header">
+                        <div class="class-stereotype">«@Service»</div>
+                        <div class="class-name">AuthService</div>
+                    </div>
+                    <div class="class-body">
+                        <div class="method">login(request)</div>
+                        <div class="method">refreshToken(token)</div>
+                        <div class="method">validateToken()</div>
+                        <div class="method">getCurrentUser()</div>
+                    </div>
+                </div>
+
+                <div class="more-classes">
+                    <span>...</span>
+                    <span>+7 Services</span>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 箭头区域 2 -->
+        <div class="arrow-zone">
+            <div class="arrow-label">调用 JpaRepository 接口</div>
+        </div>
+
+        <!-- Repository 层 -->
+        <div class="layer">
+            <div class="layer-label">数据访问层 (Repository)</div>
+            <div class="layer-content">
+                
+                <div class="class-box class-repository">
+                    <div class="class-header">
+                        <div class="class-stereotype">«@Repository»</div>
+                        <div class="class-name">PostRepository</div>
+                    </div>
+                    <div class="class-body">
+                        <div class="method">findBySlug(slug)</div>
+                        <div class="method">findByIsPublished()</div>
+                        <div class="method">findByTagsName()</div>
+                        <div class="method">findFeatured()</div>
+                    </div>
+                </div>
+
+                <div class="class-box class-repository">
+                    <div class="class-header">
+                        <div class="class-stereotype">«@Repository»</div>
+                        <div class="class-name">ProjectRepository</div>
+                    </div>
+                    <div class="class-body">
+                        <div class="method">findBySlug(slug)</div>
+                        <div class="method">findByIsActive()</div>
+                        <div class="method">findFeatured()</div>
+                        <div class="method">findAllOrdered()</div>
+                    </div>
+                </div>
+
+                <div class="class-box class-repository">
+                    <div class="class-header">
+                        <div class="class-stereotype">«@Repository»</div>
+                        <div class="class-name">CommentRepository</div>
+                    </div>
+                    <div class="class-body">
+                        <div class="method">findByPostId(id)</div>
+                        <div class="method">findPending()</div>
+                        <div class="method">countByPostId(id)</div>
+                    </div>
+                </div>
+
+                <div class="class-box class-repository">
+                    <div class="class-header">
+                        <div class="class-stereotype">«@Repository»</div>
+                        <div class="class-name">UserRepository</div>
+                    </div>
+                    <div class="class-body">
+                        <div class="method">findByUsername()</div>
+                        <div class="method">findByEmail()</div>
+                        <div class="method">existsByUsername()</div>
+                    </div>
+                </div>
+
+                <div class="more-classes">
+                    <span>...</span>
+                    <span>+7 Repositories</span>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 箭头区域 3 -->
+        <div class="arrow-zone">
+            <div class="arrow-label">ORM 映射 @Entity</div>
+        </div>
+
+        <!-- Entity 层 -->
+        <div class="layer">
+            <div class="layer-label">实体层 (Entity)</div>
+            <div class="layer-content">
+                
+                <div class="class-box class-entity">
+                    <div class="class-header">
+                        <div class="class-stereotype">«@Entity»</div>
+                        <div class="class-name">Post</div>
+                    </div>
+                    <div class="class-body">
+                        <div class="field">id: Long</div>
+                        <div class="field">title: String</div>
+                        <div class="field">content: String</div>
+                        <div class="field">tags: Set&lt;Tag&gt;</div>
+                    </div>
+                </div>
+
+                <div class="class-box class-entity">
+                    <div class="class-header">
+                        <div class="class-stereotype">«@Entity»</div>
+                        <div class="class-name">Project</div>
+                    </div>
+                    <div class="class-body">
+                        <div class="field">id: Long</div>
+                        <div class="field">title: String</div>
+                        <div class="field">description: String</div>
+                        <div class="field">tags: Set&lt;Tag&gt;</div>
+                    </div>
+                </div>
+
+                <div class="class-box class-entity">
+                    <div class="class-header">
+                        <div class="class-stereotype">«@Entity»</div>
+                        <div class="class-name">Comment</div>
+                    </div>
+                    <div class="class-body">
+                        <div class="field">id: Long</div>
+                        <div class="field">content: String</div>
+                        <div class="field">post: Post</div>
+                        <div class="field">parent: Comment</div>
+                    </div>
+                </div>
+
+                <div class="class-box class-entity">
+                    <div class="class-header">
+                        <div class="class-stereotype">«@Entity»</div>
+                        <div class="class-name">User</div>
+                    </div>
+                    <div class="class-body">
+                        <div class="field">id: Long</div>
+                        <div class="field">username: String</div>
+                        <div class="field">passwordHash: String</div>
+                        <div class="field">role: String</div>
+                    </div>
+                </div>
+
+                <div class="more-classes">
+                    <span>...</span>
+                    <span>+7 Entities</span>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 图例 -->
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: var(--controller-bg); border-color: var(--controller-border);"></div>
+            <span>Controller (表示层)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: var(--service-bg); border-color: var(--service-border);"></div>
+            <span>Service (业务逻辑层)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: var(--repository-bg); border-color: var(--repository-border);"></div>
+            <span>Repository (数据访问层)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: var(--entity-bg); border-color: var(--entity-border);"></div>
+            <span>Entity (实体层)</span>
+        </div>
+    </div>
+
+    <div class="diagram-title">图 4-3 后端三层架构类图</div>
+</div>
+
+</body>
+</html>

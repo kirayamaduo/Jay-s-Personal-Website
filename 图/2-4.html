@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图 2-4 JWT 认证流程与 Token 结构示意图</title>
+    <style>
+        :root {
+            --client-color: #3b82f6;
+            --server-color: #10b981;
+            --jwt-header: #ef4444;  /* Red */
+            --jwt-payload: #8b5cf6; /* Purple */
+            --jwt-sign: #0ea5e9;    /* Blue */
+            --bg-color: #f8fafc;
+            --border-color: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .diagram-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            width: 950px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .diagram-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #1e293b;
+            margin: 0;
+            margin-top: 10px;
+        }
+
+        /* Top Section: Sequence Flow */
+        .flow-section {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            padding: 0 40px;
+        }
+
+        .actor-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .actor-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .actor-line {
+            width: 2px;
+            height: 380px;
+            background: repeating-linear-gradient(to bottom, #cbd5e1 0, #cbd5e1 5px, transparent 5px, transparent 10px);
+        }
+
+        .step-box {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border: 1px solid var(--border-color);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #64748b;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Message Arrows */
+        .message-row {
+            position: absolute;
+            left: 100px;
+            right: 100px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+        }
+
+        .arrow-line {
+            height: 2px;
+            background-color: #64748b;
+            flex-grow: 1;
+            position: relative;
+        }
+
+        .arrow-head {
+            width: 0; height: 0;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+        }
+        .right-arrow { border-left: 8px solid #64748b; margin-left: -2px; }
+        .left-arrow { border-right: 8px solid #64748b; margin-right: -2px; }
+
+        .msg-text {
+            position: absolute;
+            top: -15px;
+            width: 100%;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: #334155;
+            background-color: white;
+            padding: 0 5px;
+            width: fit-content;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Bottom Section: Token Structure */
+        .token-section {
+            background-color: #f8fafc;
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .token-visual {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            word-break: break-all;
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            flex: 2;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .token-part { cursor: pointer; transition: opacity 0.2s; }
+        .token-part:hover { opacity: 0.8; }
+        
+        .part-header { color: var(--jwt-header); font-weight: bold; }
+        .part-payload { color: var(--jwt-payload); font-weight: bold; }
+        .part-sign { color: var(--jwt-sign); font-weight: bold; }
+
+        .token-legend {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            font-size: 12px;
+        }
+
+        .legend-title {
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+        
+        .json-preview {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 8px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            font-size: 10px;
+        }
+
+        /* Processing badges */
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        .badge-auth { background: #fee2e2; color: #991b1b; }
+        .badge-filter { background: #dbeafe; color: #1e40af; }
+
+    </style>
+</head>
+<body>
+
+<div class="diagram-container">
+    
+    <!-- SECTION 1: Sequence Flow -->
+    <div class="flow-section">
+        <!-- Client Actor -->
+        <div class="actor-column">
+            <div class="actor-icon" style="background:#dbeafe; color:#3b82f6;">👤</div>
+            <div style="font-weight:bold; font-size:14px; margin-bottom:10px;">客户端 (React)</div>
+            <div class="actor-line"></div>
+        </div>
+
+        <!-- Flow Lines -->
+        <div style="flex-grow: 1; position: relative;">
+            
+            <!-- Step 1: Login Request -->
+            <div class="message-row" style="top: 40px;">
+                <div class="arrow-line"><div class="arrow-head right-arrow" style="position:absolute; right:0;"></div></div>
+                <div class="msg-text">1. POST /auth/login {user, pass}</div>
+            </div>
+
+            <!-- Server Processing 1 -->
+            <div class="step-box" style="top: 70px; border-left: 3px solid var(--server-color);">
+                <strong>Verify Credentials</strong><br>
+                Database Query
+            </div>
+
+            <!-- Server Processing 2 -->
+            <div class="step-box" style="top: 110px; border-left: 3px solid var(--jwt-payload);">
+                <strong>Generate Token</strong><br>
+                JwtTokenProvider
+            </div>
+
+            <!-- Step 2: Return Token -->
+            <div class="message-row" style="top: 150px;">
+                <div class="arrow-head left-arrow" style="position:absolute; left:0;"></div>
+                <div class="arrow-line"></div>
+                <div class="msg-text" style="color:var(--server-color);">2. 200 OK (Access Token)</div>
+            </div>
+
+            <!-- Gap -->
+
+            <!-- Step 3: API Request -->
+            <div class="message-row" style="top: 220px;">
+                <div class="arrow-line"><div class="arrow-head right-arrow" style="position:absolute; right:0;"></div></div>
+                <div class="msg-text">3. GET /api/admin/posts <br><span style="color:#64748b; font-weight:normal;">Authorization: Bearer eyJhbG...</span></div>
+            </div>
+
+            <!-- Server Processing 3 (Filter) -->
+            <div class="step-box" style="top: 260px; border-left: 3px solid #3b82f6; width: 220px; z-index:5;">
+                <strong>JwtAuthenticationFilter</strong>
+                <div style="font-size:10px; margin-top:4px; color:#334155;">
+                    1. Intercept Request<br>
+                    2. Validate Signature<br>
+                    3. Set SecurityContext
+                </div>
+            </div>
+
+            <!-- Step 4: Data Response -->
+            <div class="message-row" style="top: 340px;">
+                <div class="arrow-head left-arrow" style="position:absolute; left:0;"></div>
+                <div class="arrow-line"></div>
+                <div class="msg-text" style="color:var(--server-color);">4. 200 OK (JSON Data)</div>
+            </div>
+
+        </div>
+
+        <!-- Server Actor -->
+        <div class="actor-column">
+            <div class="actor-icon" style="background:#d1fae5; color:#10b981;">🖥️</div>
+            <div style="font-weight:bold; font-size:14px; margin-bottom:10px;">服务端 (Spring Boot)</div>
+            <div class="actor-line"></div>
+        </div>
+    </div>
+
+    <!-- SECTION 2: Token Structure -->
+    <div style="padding: 0 40px;">
+        <div style="font-size:14px; font-weight:bold; color:#475569; margin-bottom:10px;">Token 结构剖析 (Structure Analysis)</div>
+        <div class="token-section">
+            <!-- Visual String -->
+            <div class="token-visual">
+                <span class="part-header">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9</span><span style="color:#94a3b8">.</span><span class="part-payload">eyJzdWIiOiJ1c2VyMTIzIiwicm9sZSI6IkFETUlOIiwiZXhwIjoxNTE2MjM5MDIyfQ</span><span style="color:#94a3b8">.</span><span class="part-sign">SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</span>
+            </div>
+
+            <!-- Legend -->
+            <div class="token-legend">
+                
+                <!-- Header -->
+                <div class="legend-item">
+                    <div class="legend-title" style="color:var(--jwt-header);">
+                        <span class="dot" style="background:var(--jwt-header);"></span> Header (头部)
+                    </div>
+                    <div class="json-preview">{"alg": "HS256", "typ": "JWT"}</div>
+                </div>
+
+                <!-- Payload -->
+                <div class="legend-item">
+                    <div class="legend-title" style="color:var(--jwt-payload);">
+                        <span class="dot" style="background:var(--jwt-payload);"></span> Payload (负载)
+                    </div>
+                    <div class="json-preview">
+                        {"sub": "jay", "role": "ADMIN",<br> "exp": 1729382910}
+                    </div>
+                </div>
+
+                <!-- Signature -->
+                <div class="legend-item">
+                    <div class="legend-title" style="color:var(--jwt-sign);">
+                        <span class="dot" style="background:var(--jwt-sign);"></span> Signature (签名)
+                    </div>
+                    <div style="font-size:10px; color:#64748b;">
+                        HMACSHA256(base64(Header) + "." + base64(Payload), secret)
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <p class="diagram-title">图 2-4 JWT 认证流程与 Token 结构示意图</p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,39 @@
+spring:
+  # H2 内存数据库配置（用于测试）
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  # JPA 配置
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+
+  # 禁用 Redis（测试时不需要）
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  # 禁用缓存
+  cache:
+    type: none
+
+# JWT 配置（测试用）
+jwt:
+  secret: TestSecretKeyForJWTTokenGenerationMustBeAtLeast32CharactersLongForHS256
+  access-token-expiration: 900000
+  refresh-token-expiration: 604800000
+
+# 日志配置
+logging:
+  level:
+    com.jay.techportal: DEBUG
+    org.springframework.security: DEBUG

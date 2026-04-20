@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图 2-1 Spring Boot 后端分层架构图</title>
+    <style>
+        :root {
+            --primary-color: #0ea5e9; /* Sky Blue */
+            --secondary-color: #64748b; /* Slate */
+            --bg-color: #f8fafc;
+            --box-bg: #ffffff;
+            --border-color: #cbd5e1;
+            --text-color: #1e293b;
+            --arrow-color: #94a3b8;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .diagram-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            width: 900px;
+            position: relative;
+        }
+
+        .diagram-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text-color);
+            margin-top: 30px;
+            margin-bottom: 0;
+        }
+
+        .layer-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            position: relative;
+        }
+
+        /* Generic Box Styles */
+        .box {
+            border: 2px solid var(--border-color);
+            background-color: var(--box-bg);
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .box-title {
+            font-weight: bold;
+            font-size: 14px;
+            color: var(--text-color);
+            margin-bottom: 8px;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .box-content {
+            font-size: 12px;
+            color: var(--secondary-color);
+            line-height: 1.4;
+        }
+
+        /* Specific Layers */
+        .client-layer {
+            border-color: #38bdf8;
+            background-color: #e0f2fe;
+            width: 200px;
+            margin: 0 auto;
+        }
+
+        .security-layer {
+            border-color: #f472b6;
+            background-color: #fce7f3;
+            border-style: dashed;
+            margin: 0 50px;
+        }
+
+        .main-architecture {
+            display: flex;
+            gap: 20px;
+            justify-content: space-between;
+        }
+
+        .core-stack {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .support-stack {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .controller-layer {
+            border-color: #818cf8;
+            background-color: #eef2ff;
+        }
+
+        .service-layer {
+            border-color: #34d399;
+            background-color: #ecfdf5;
+        }
+
+        .repo-layer {
+            border-color: #fbbf24;
+            background-color: #fffbeb;
+        }
+
+        .data-layer {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .db-box {
+            flex: 1;
+            border-color: #94a3b8;
+            background-color: #f1f5f9;
+            border-bottom-width: 6px; /* Mimic DB cylinder shape slightly */
+        }
+
+        .common-box {
+            border-color: #a78bfa;
+            background-color: #f5f3ff;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Arrows */
+        .arrow-down {
+            width: 0; 
+            height: 0; 
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid var(--arrow-color);
+            margin: -15px auto 5px auto;
+        }
+        
+        .arrow-line {
+            width: 2px;
+            height: 15px;
+            background-color: var(--arrow-color);
+            margin: 0 auto;
+        }
+
+        .component-tag {
+            display: inline-block;
+            background: white;
+            border: 1px solid rgba(0,0,0,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin: 2px;
+            font-family: 'Consolas', monospace;
+            font-size: 11px;
+        }
+
+        /* Request Flow Indicator */
+        .flow-arrow {
+            position: absolute;
+            left: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-size: 12px;
+            color: #64748b;
+            border-left: 2px dashed #cbd5e1;
+            padding-left: 5px;
+            height: 80%;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="diagram-container">
+    
+    <div class="layer-container">
+        
+        <!-- Client Layer -->
+        <div class="box client-layer">
+            <span class="box-title">客户端 (Frontend)</span>
+            <div class="box-content">
+                React 18 SPA<br>
+                (Browser / Mobile)
+            </div>
+        </div>
+
+        <!-- Connection Arrow -->
+        <div>
+            <div class="arrow-line"></div>
+            <div class="arrow-down"></div>
+        </div>
+
+        <!-- Security Layer -->
+        <div class="box security-layer">
+            <span class="box-title">安全过滤层 (Security Filter Chain)</span>
+            <div class="box-content">
+                <span class="component-tag">JwtAuthenticationFilter</span>
+                <span class="component-tag">CorsFilter</span>
+                <span class="component-tag">UsernamePasswordAuthenticationToken</span>
+            </div>
+        </div>
+
+        <!-- Connection Arrow -->
+        <div>
+            <div class="arrow-line"></div>
+            <div class="arrow-down"></div>
+        </div>
+
+        <div class="main-architecture">
+            <!-- Left Column: Core Layers -->
+            <div class="core-stack">
+                <!-- Controller Layer -->
+                <div class="box controller-layer">
+                    <span class="box-title">Web 表现层 (Controller Layer)</span>
+                    <div class="box-content">
+                        接收 HTTP 请求 / 参数校验 (@Valid) / 统一响应 Result&lt;T&gt;<br>
+                        <div style="margin-top:5px;">
+                            <span class="component-tag">AuthController</span>
+                            <span class="component-tag">PostController</span>
+                            <span class="component-tag">ProjectController</span>
+                            <span class="component-tag">...DTO</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Connection Arrow -->
+                <div>
+                    <div class="arrow-line"></div>
+                    <div class="arrow-down"></div>
+                </div>
+
+                <!-- Service Layer -->
+                <div class="box service-layer">
+                    <span class="box-title">业务逻辑层 (Service Layer)</span>
+                    <div class="box-content">
+                        业务逻辑处理 / 事务控制 (@Transactional) / 缓存处理<br>
+                        <div style="margin-top:5px;">
+                            <span class="component-tag">AuthService</span>
+                            <span class="component-tag">PostService</span>
+                            <span class="component-tag">VisitLogService</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Connection Arrow -->
+                <div>
+                    <div class="arrow-line"></div>
+                    <div class="arrow-down"></div>
+                </div>
+
+                <!-- Repository Layer -->
+                <div class="box repo-layer">
+                    <span class="box-title">数据访问层 (Repository Layer)</span>
+                    <div class="box-content">
+                        Spring Data JPA / Hibernate / 动态 SQL<br>
+                        <div style="margin-top:5px;">
+                            <span class="component-tag">UserRepository</span>
+                            <span class="component-tag">PostRepository</span>
+                            <span class="component-tag">JpaRepository&lt;T, ID&gt;</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Cross-cutting Concerns -->
+            <div class="support-stack">
+                <div class="box common-box">
+                    <span class="box-title">公共组件 & 配置</span>
+                    <div class="box-content" style="display: flex; flex-direction: column; gap: 8px;">
+                        <div>
+                            <strong>全局异常处理</strong><br>
+                            <span class="component-tag">GlobalExceptionHandler</span>
+                        </div>
+                        <div>
+                            <strong>API 文档</strong><br>
+                            <span class="component-tag">Swagger / SpringDoc</span>
+                        </div>
+                        <div>
+                            <strong>配置类</strong><br>
+                            <span class="component-tag">RedisConfig</span>
+                            <span class="component-tag">WebConfig</span>
+                        </div>
+                        <div>
+                            <strong>工具类</strong><br>
+                            <span class="component-tag">JwtTokenProvider</span>
+                            <span class="component-tag">ResultCode</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Connection Arrow -->
+        <div>
+            <div class="arrow-line"></div>
+            <div class="arrow-down"></div>
+        </div>
+
+        <!-- Data Layer -->
+        <div class="data-layer">
+            <div class="box db-box">
+                <span class="box-title">MySQL 8.0</span>
+                <div class="box-content">
+                    持久化存储<br>
+                    (Users, Posts, Projects...)
+                </div>
+            </div>
+            <div class="box db-box" style="border-color: #ef4444; background-color: #fef2f2;">
+                <span class="box-title">Redis 7.0</span>
+                <div class="box-content">
+                    高速缓存 / Session<br>
+                    (Config, Hot Articles)
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <p class="diagram-title">图 2-1 Spring Boot 后端分层架构图</p>
+</div>
+
+</body>
+</html>

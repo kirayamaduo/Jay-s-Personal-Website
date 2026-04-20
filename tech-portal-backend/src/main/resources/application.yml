@@ -1,0 +1,66 @@
+server:
+  port: 8080 # 后端运行端口
+
+spring:
+  application:
+    name: tech-portal-backend
+
+  # Web 配置
+  mvc:
+    static-path-pattern: /**
+  web:
+    resources:
+      static-locations: classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/,classpath:/public/
+
+  # MySQL 数据库配置（生产环境通过环境变量注入）
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/tech_portal_pro?useSSL=false&serverTimezone=UTC&characterEncoding=utf-8&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:Root_1234!}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # JPA 配置
+  jpa:
+    # 这是一个很关键的配置！
+    # update: 自动根据 Entity 更新表结构（慎用，生产环境通常用 validate）
+    # none: 什么都不做（因为我们已经手动建好表了，选这个最稳）
+    hibernate:
+      ddl-auto: none
+    show-sql: true # 在控制台打印 SQL，方便调试
+    properties:
+      hibernate:
+        format_sql: true # 格式化打印的 SQL
+
+  # Redis 配置（生产环境通过环境变量注入）
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: 0
+      timeout: 10000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
+# JWT 配置（生产环境必须通过环境变量注入密钥）
+jwt:
+  secret: ${JWT_SECRET:TechPortalSecretKey2024ForJWTTokenGenerationAndValidationMustBeLongEnough}
+  access-token-expiration: ${JWT_ACCESS_EXPIRATION:900000}
+  refresh-token-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
+
+# SpringDoc OpenAPI 配置 (Swagger UI)
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  packages-to-scan: com.jay.techportal.controller, com.jay.techportal.controller.admin
+  paths-to-match: /api/**

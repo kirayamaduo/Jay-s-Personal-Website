@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图 3-3 文章发布业务流程图</title>
+    <style>
+        :root {
+            --lane-header-bg: #e2e8f0;
+            --lane-header-text: #475569;
+            --lane-client-bg: #f8fafc;
+            --lane-server-bg: #f1f5f9;
+            --process-bg: #ffffff;
+            --process-border: #3b82f6;
+            --decision-bg: #fff7ed;
+            --decision-border: #f59e0b;
+            --start-end-bg: #dbeafe;
+            --line-color: #64748b;
+            --db-bg: #f0fdf4;
+            --db-border: #22c55e;
+            --cache-bg: #fef2f2;
+            --cache-border: #ef4444;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background-color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .diagram-container {
+            width: 900px;
+            background-color: white;
+            padding: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        .diagram-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            color: #1e293b;
+            margin-top: 20px;
+        }
+
+        /* Swimlanes */
+        .swimlane-container {
+            display: flex;
+            border: 2px solid var(--line-color);
+            position: relative;
+        }
+
+        .swimlane {
+            flex: 1;
+            min-height: 680px; /* Increased height for content */
+            position: relative;
+        }
+
+        .swimlane:first-child {
+            border-right: 2px dashed var(--line-color);
+            background-color: var(--lane-client-bg);
+        }
+
+        .swimlane:last-child {
+            background-color: var(--lane-server-bg);
+        }
+
+        .lane-header {
+            text-align: center;
+            padding: 10px;
+            background-color: var(--lane-header-bg);
+            color: var(--lane-header-text);
+            font-weight: bold;
+            border-bottom: 2px solid var(--line-color);
+        }
+
+        /* Flowchart Elements */
+        .element {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px;
+            font-size: 13px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 2;
+        }
+
+        .start-end {
+            width: 100px;
+            height: 40px;
+            border-radius: 20px;
+            background-color: var(--start-end-bg);
+            border: 2px solid #3b82f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .process {
+            width: 150px;
+            background-color: var(--process-bg);
+            border: 2px solid var(--process-border);
+            border-radius: 4px;
+        }
+
+        .decision {
+            width: 120px;
+            height: 60px;
+            background-color: var(--decision-bg);
+            border: 2px solid var(--decision-border);
+            transform: translateX(-50%) rotate(45deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .decision-content {
+            transform: rotate(-45deg);
+            width: 100%;
+            text-align: center;
+        }
+
+        .db-op {
+            width: 140px;
+            background-color: var(--db-bg);
+            border: 2px solid var(--db-border);
+            border-radius: 0 15px 15px 0; /* Cylinder-ish look */
+            border-left: 4px solid var(--db-border);
+        }
+
+        .cache-op {
+            width: 140px;
+            background-color: var(--cache-bg);
+            border: 2px solid var(--cache-border);
+            border-radius: 4px;
+            border-style: dashed;
+        }
+
+        /* SVG Lines */
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Positioning */
+        /* Client Lane */
+        #start { top: 30px; }
+        #enter-editor { top: 90px; }
+        #upload-img { top: 160px; }
+        #click-publish { top: 250px; }
+        #show-success { top: 580px; }
+        #end { top: 640px; }
+
+        /* Server Lane */
+        #upload-service { top: 160px; }
+        #validate-data { top: 250px; } /* Decision */
+        #save-db { top: 380px; }
+        #update-cache { top: 460px; }
+        #return-res { top: 530px; }
+
+    </style>
+</head>
+<body>
+
+<div class="diagram-container">
+    <div class="swimlane-container">
+        
+        <!-- Client Lane -->
+        <div class="swimlane">
+            <div class="lane-header">管理员 / 前端 (Admin Client)</div>
+            
+            <div id="start" class="element start-end">开始</div>
+
+            <div id="enter-editor" class="element process">
+                进入 Markdown 编辑器<br>撰写标题与正文
+            </div>
+
+            <div id="upload-img" class="element process" style="border-style: dashed;">
+                上传封面/插图<br>(异步请求)
+            </div>
+
+            <div id="click-publish" class="element process">
+                设置标签与分类<br>点击“发布”按钮
+            </div>
+
+            <div id="show-success" class="element process">
+                显示“发布成功”提示<br>跳转至文章列表
+            </div>
+
+            <div id="end" class="element start-end">结束</div>
+        </div>
+
+        <!-- Server Lane -->
+        <div class="swimlane">
+            <div class="lane-header">后端系统 (Spring Boot + Redis)</div>
+
+            <div id="upload-service" class="element process" style="font-size:12px;">
+                FileService 存储文件<br>返回 URL
+            </div>
+
+            <div id="validate-data" class="element decision">
+                <div class="decision-content">数据校验<br>通过?</div>
+            </div>
+
+            <div id="save-db" class="element db-op">
+                写入 MySQL<br>(posts, post_tags)
+            </div>
+
+            <div id="update-cache" class="element cache-op">
+                更新 Redis 缓存<br>(删除旧 Key)
+            </div>
+
+            <div id="return-res" class="element process">
+                返回 Result&lt;Void&gt;<br>(200 OK)
+            </div>
+        </div>
+
+        <!-- Connecting Lines -->
+        <svg>
+            <defs>
+                <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#64748b" />
+                </marker>
+            </defs>
+
+            <!-- Start -> Editor -->
+            <line x1="225" y1="70" x2="225" y2="90" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)" />
+
+            <!-- Editor -> Upload Img -->
+            <line x1="225" y1="134" x2="225" y2="160" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)" />
+
+            <!-- Async Upload Interaction -->
+            <line x1="300" y1="182" x2="600" y2="182" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)" />
+            <text x="450" y="175" font-size="10" fill="#64748b" text-anchor="middle">上传文件</text>
+
+            <line x1="600" y1="200" x2="300" y2="200" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)" />
+            <text x="450" y="215" font-size="10" fill="#64748b" text-anchor="middle">返回 URL</text>
+
+            <!-- Upload Img -> Publish -->
+            <line x1="225" y1="204" x2="225" y2="250" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)" />
+
+            <!-- Publish Request -->
+            <line x1="300" y1="272" x2="615" y2="272" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)" />
+            <text x="450" y="265" font-size="11" fill="#64748b" text-anchor="middle">POST JSON 数据</text>
+
+            <!-- Validation Check -->
+            <line x1="675" y1="310" x2="675" y2="330" stroke="#64748b" stroke-width="2" /> <!-- Vertical stub -->
+            
+            <!-- Validation Failed (No) -->
+            <path d="M675,310 L750,310 L750,112 L300,112" fill="none" stroke="#ef4444" stroke-width="1.5" marker-end="url(#arrow)" />
+            <text x="715" y="305" font-size="11" fill="#ef4444">否 (400)</text>
+
+            <!-- Validation Success (Yes) -->
+            <line x1="675" y1="310" x2="675" y2="380" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)" />
+            <text x="685" y="350" font-size="11" fill="#64748b">是</text>
+
+            <!-- DB -> Cache -->
+            <line x1="675" y1="424" x2="675" y2="460" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)" />
+
+            <!-- Cache -> Return -->
+            <line x1="675" y1="504" x2="675" y2="530" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)" />
+
+            <!-- Return -> Client Show -->
+            <line x1="600" y1="552" x2="300" y2="590" stroke="#64748b" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrow)" />
+
+            <!-- Show -> End -->
+            <line x1="225" y1="624" x2="225" y2="640" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)" />
+
+        </svg>
+
+    </div>
+
+    <p class="diagram-title">图 3-3 文章发布业务流程图</p>
+</div>
+
+</body>
+</html>

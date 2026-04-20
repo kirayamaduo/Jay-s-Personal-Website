@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据库表结构设计</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SimSun', '宋体', 'Microsoft YaHei', sans-serif;
+            background-color: #ffffff;
+            padding: 30px;
+            line-height: 1.4;
+        }
+
+        .page-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            font-family: '黑体', 'SimHei', sans-serif;
+        }
+
+        .tables-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .table-card {
+            border: 1px solid #000;
+            background: #fff;
+            font-size: 11px;
+        }
+
+        .table-header {
+            background: #e0e0e0;
+            border-bottom: 1px solid #000;
+            padding: 6px 10px;
+            font-weight: bold;
+            font-size: 12px;
+            text-align: center;
+            font-family: '黑体', 'SimHei', sans-serif;
+        }
+
+        .table-content {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table-content th,
+        .table-content td {
+            border: 1px solid #999;
+            padding: 4px 6px;
+            text-align: left;
+            font-size: 10px;
+        }
+
+        .table-content th {
+            background: #f5f5f5;
+            font-weight: bold;
+            text-align: center;
+            font-size: 10px;
+        }
+
+        .col-name {
+            width: 28%;
+            font-family: 'Consolas', 'Courier New', monospace;
+        }
+
+        .col-type {
+            width: 25%;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 9px;
+        }
+
+        .col-constraint {
+            width: 18%;
+            text-align: center;
+            font-size: 9px;
+        }
+
+        .col-desc {
+            width: 29%;
+        }
+
+        .pk {
+            color: #c00;
+            font-weight: bold;
+        }
+
+        .fk {
+            color: #006;
+            font-style: italic;
+        }
+
+        .constraint-badge {
+            display: inline-block;
+            padding: 1px 3px;
+            border-radius: 2px;
+            font-size: 8px;
+            margin: 1px;
+        }
+
+        .badge-pk {
+            background: #ffcccc;
+            color: #900;
+            border: 1px solid #c00;
+        }
+
+        .badge-fk {
+            background: #cce5ff;
+            color: #004;
+            border: 1px solid #006;
+        }
+
+        .badge-uk {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #28a745;
+        }
+
+        .badge-nn {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffc107;
+        }
+
+        /* 打印优化 */
+        @media print {
+            body {
+                padding: 10px;
+            }
+            .tables-container {
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<h1 class="page-title">数据库表结构设计</h1>
+
+<div class="tables-container">
+
+    <!-- 1. 用户表 users -->
+    <div class="table-card">
+        <div class="table-header">users（用户表）</div>
+        <table class="table-content">
+            <tr>
+                <th class="col-name">字段名</th>
+                <th class="col-type">类型</th>
+                <th class="col-constraint">约束</th>
+                <th class="col-desc">说明</th>
+            </tr>
+            <tr>
+                <td class="col-name pk">id</td>
+                <td class="col-type">BIGINT</td>
+                <td class="col-constraint"><span class="constraint-badge badge-pk">PK</span></td>
+                <td class="col-desc">主键，自增</td>
+            </tr>
+            <tr>
+                <td class="col-name">username</td>
+                <td class="col-type">VARCHAR(50)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-uk">UK</span><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">用户名</td>
+            </tr>
+            <tr>
+                <td class="col-name">password_hash</td>
+                <td class="col-type">VARCHAR(255)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">密码哈希</td>
+            </tr>
+            <tr>
+                <td class="col-name">email</td>
+                <td class="col-type">VARCHAR(100)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-uk">UK</span></td>
+                <td class="col-desc">邮箱地址</td>
+            </tr>
+            <tr>
+                <td class="col-name">avatar_url</td>
+                <td class="col-type">VARCHAR(255)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">头像URL</td>
+            </tr>
+            <tr>
+                <td class="col-name">role</td>
+                <td class="col-type">VARCHAR(20)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">角色(ADMIN/GUEST)</td>
+            </tr>
+            <tr>
+                <td class="col-name">last_login</td>
+                <td class="col-type">TIMESTAMP</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">最后登录时间</td>
+            </tr>
+            <tr>
+                <td class="col-name">created_at</td>
+                <td class="col-type">TIMESTAMP</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">创建时间</td>
+            </tr>
+            <tr>
+                <td class="col-name">updated_at</td>
+                <td class="col-type">TIMESTAMP</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">更新时间</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 2. 博客文章表 posts -->
+    <div class="table-card">
+        <div class="table-header">posts（博客文章表）</div>
+        <table class="table-content">
+            <tr>
+                <th class="col-name">字段名</th>
+                <th class="col-type">类型</th>
+                <th class="col-constraint">约束</th>
+                <th class="col-desc">说明</th>
+            </tr>
+            <tr>
+                <td class="col-name pk">id</td>
+                <td class="col-type">BIGINT</td>
+                <td class="col-constraint"><span class="constraint-badge badge-pk">PK</span></td>
+                <td class="col-desc">主键，自增</td>
+            </tr>
+            <tr>
+                <td class="col-name fk">author_id</td>
+                <td class="col-type">BIGINT</td>
+                <td class="col-constraint"><span class="constraint-badge badge-fk">FK</span></td>
+                <td class="col-desc">作者ID→users</td>
+            </tr>
+            <tr>
+                <td class="col-name">title</td>
+                <td class="col-type">VARCHAR(255)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">文章标题</td>
+            </tr>
+            <tr>
+                <td class="col-name">slug</td>
+                <td class="col-type">VARCHAR(255)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-uk">UK</span><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">URL友好标识</td>
+            </tr>
+            <tr>
+                <td class="col-name">excerpt</td>
+                <td class="col-type">VARCHAR(500)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">文章摘要</td>
+            </tr>
+            <tr>
+                <td class="col-name">content</td>
+                <td class="col-type">LONGTEXT</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">Markdown内容</td>
+            </tr>
+            <tr>
+                <td class="col-name">rendered_content</td>
+                <td class="col-type">LONGTEXT</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">渲染后HTML</td>
+            </tr>
+            <tr>
+                <td class="col-name">cover_image</td>
+                <td class="col-type">VARCHAR(500)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">封面图片</td>
+            </tr>
+            <tr>
+                <td class="col-name">is_published</td>
+                <td class="col-type">BOOLEAN</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">是否发布</td>
+            </tr>
+            <tr>
+                <td class="col-name">is_featured</td>
+                <td class="col-type">BOOLEAN</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">是否精选</td>
+            </tr>
+            <tr>
+                <td class="col-name">view_count</td>
+                <td class="col-type">INT</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">浏览次数</td>
+            </tr>
+            <tr>
+                <td class="col-name">published_at</td>
+                <td class="col-type">TIMESTAMP</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">发布时间</td>
+            </tr>
+            <tr>
+                <td class="col-name">created_at</td>
+                <td class="col-type">TIMESTAMP</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">创建时间</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 3. 评论表 comments -->
+    <div class="table-card">
+        <div class="table-header">comments（评论表）</div>
+        <table class="table-content">
+            <tr>
+                <th class="col-name">字段名</th>
+                <th class="col-type">类型</th>
+                <th class="col-constraint">约束</th>
+                <th class="col-desc">说明</th>
+            </tr>
+            <tr>
+                <td class="col-name pk">id</td>
+                <td class="col-type">BIGINT</td>
+                <td class="col-constraint"><span class="constraint-badge badge-pk">PK</span></td>
+                <td class="col-desc">主键，自增</td>
+            </tr>
+            <tr>
+                <td class="col-name fk">post_id</td>
+                <td class="col-type">BIGINT</td>
+                <td class="col-constraint"><span class="constraint-badge badge-fk">FK</span><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">文章ID→posts</td>
+            </tr>
+            <tr>
+                <td class="col-name fk">parent_id</td>
+                <td class="col-type">BIGINT</td>
+                <td class="col-constraint"><span class="constraint-badge badge-fk">FK</span></td>
+                <td class="col-desc">父评论ID(回复)</td>
+            </tr>
+            <tr>
+                <td class="col-name">nickname</td>
+                <td class="col-type">VARCHAR(50)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">评论者昵称</td>
+            </tr>
+            <tr>
+                <td class="col-name">email</td>
+                <td class="col-type">VARCHAR(100)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">评论者邮箱</td>
+            </tr>
+            <tr>
+                <td class="col-name">website</td>
+                <td class="col-type">VARCHAR(255)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">评论者网站</td>
+            </tr>
+            <tr>
+                <td class="col-name">content</td>
+                <td class="col-type">TEXT</td>
+                <td class="col-constraint"><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">评论内容</td>
+            </tr>
+            <tr>
+                <td class="col-name">reply_to_nickname</td>
+                <td class="col-type">VARCHAR(50)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">回复目标昵称</td>
+            </tr>
+            <tr>
+                <td class="col-name">is_approved</td>
+                <td class="col-type">BOOLEAN</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">是否审核通过</td>
+            </tr>
+            <tr>
+                <td class="col-name">is_spam</td>
+                <td class="col-type">BOOLEAN</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">是否垃圾评论</td>
+            </tr>
+            <tr>
+                <td class="col-name">ip_address</td>
+                <td class="col-type">VARCHAR(45)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">IP地址</td>
+            </tr>
+            <tr>
+                <td class="col-name">created_at</td>
+                <td class="col-type">TIMESTAMP</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">创建时间</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 4. 项目作品表 projects -->
+    <div class="table-card">
+        <div class="table-header">projects（项目作品表）</div>
+        <table class="table-content">
+            <tr>
+                <th class="col-name">字段名</th>
+                <th class="col-type">类型</th>
+                <th class="col-constraint">约束</th>
+                <th class="col-desc">说明</th>
+            </tr>
+            <tr>
+                <td class="col-name pk">id</td>
+                <td class="col-type">BIGINT</td>
+                <td class="col-constraint"><span class="constraint-badge badge-pk">PK</span></td>
+                <td class="col-desc">主键，自增</td>
+            </tr>
+            <tr>
+                <td class="col-name">title</td>
+                <td class="col-type">VARCHAR(100)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">项目标题</td>
+            </tr>
+            <tr>
+                <td class="col-name">slug</td>
+                <td class="col-type">VARCHAR(100)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-uk">UK</span></td>
+                <td class="col-desc">URL友好标识</td>
+            </tr>
+            <tr>
+                <td class="col-name">description</td>
+                <td class="col-type">VARCHAR(500)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">项目简介</td>
+            </tr>
+            <tr>
+                <td class="col-name">content</td>
+                <td class="col-type">LONGTEXT</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">详细说明</td>
+            </tr>
+            <tr>
+                <td class="col-name">icon</td>
+                <td class="col-type">VARCHAR(50)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">项目图标</td>
+            </tr>
+            <tr>
+                <td class="col-name">gradient_class</td>
+                <td class="col-type">VARCHAR(100)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">渐变色样式</td>
+            </tr>
+            <tr>
+                <td class="col-name">github_url</td>
+                <td class="col-type">VARCHAR(255)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">GitHub链接</td>
+            </tr>
+            <tr>
+                <td class="col-name">demo_url</td>
+                <td class="col-type">VARCHAR(255)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">演示链接</td>
+            </tr>
+            <tr>
+                <td class="col-name">stars_count</td>
+                <td class="col-type">INT</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">Star数量</td>
+            </tr>
+            <tr>
+                <td class="col-name">tech_stack</td>
+                <td class="col-type">JSON</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">技术栈数组</td>
+            </tr>
+            <tr>
+                <td class="col-name">is_featured</td>
+                <td class="col-type">BOOLEAN</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">是否精选</td>
+            </tr>
+            <tr>
+                <td class="col-name">display_order</td>
+                <td class="col-type">INT</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">显示顺序</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 5. 标签表 tags -->
+    <div class="table-card">
+        <div class="table-header">tags（标签表）</div>
+        <table class="table-content">
+            <tr>
+                <th class="col-name">字段名</th>
+                <th class="col-type">类型</th>
+                <th class="col-constraint">约束</th>
+                <th class="col-desc">说明</th>
+            </tr>
+            <tr>
+                <td class="col-name pk">id</td>
+                <td class="col-type">BIGINT</td>
+                <td class="col-constraint"><span class="constraint-badge badge-pk">PK</span></td>
+                <td class="col-desc">主键，自增</td>
+            </tr>
+            <tr>
+                <td class="col-name">name</td>
+                <td class="col-type">VARCHAR(50)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-uk">UK</span><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">标签名称</td>
+            </tr>
+            <tr>
+                <td class="col-name">slug</td>
+                <td class="col-type">VARCHAR(50)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-uk">UK</span></td>
+                <td class="col-desc">URL友好标识</td>
+            </tr>
+            <tr>
+                <td class="col-name">color</td>
+                <td class="col-type">VARCHAR(20)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">标签颜色</td>
+            </tr>
+            <tr>
+                <td class="col-name">description</td>
+                <td class="col-type">VARCHAR(200)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">标签描述</td>
+            </tr>
+            <tr>
+                <td class="col-name">created_at</td>
+                <td class="col-type">TIMESTAMP</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">创建时间</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 6. 文章-标签关联表 post_tags -->
+    <div class="table-card">
+        <div class="table-header">post_tags（文章-标签关联表）</div>
+        <table class="table-content">
+            <tr>
+                <th class="col-name">字段名</th>
+                <th class="col-type">类型</th>
+                <th class="col-constraint">约束</th>
+                <th class="col-desc">说明</th>
+            </tr>
+            <tr>
+                <td class="col-name pk fk">post_id</td>
+                <td class="col-type">BIGINT</td>
+                <td class="col-constraint"><span class="constraint-badge badge-pk">PK</span><span class="constraint-badge badge-fk">FK</span></td>
+                <td class="col-desc">文章ID→posts</td>
+            </tr>
+            <tr>
+                <td class="col-name pk fk">tag_id</td>
+                <td class="col-type">BIGINT</td>
+                <td class="col-constraint"><span class="constraint-badge badge-pk">PK</span><span class="constraint-badge badge-fk">FK</span></td>
+                <td class="col-desc">标签ID→tags</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 7. 项目-标签关联表 project_tags -->
+    <div class="table-card">
+        <div class="table-header">project_tags（项目-标签关联表）</div>
+        <table class="table-content">
+            <tr>
+                <th class="col-name">字段名</th>
+                <th class="col-type">类型</th>
+                <th class="col-constraint">约束</th>
+                <th class="col-desc">说明</th>
+            </tr>
+            <tr>
+                <td class="col-name pk fk">project_id</td>
+                <td class="col-type">BIGINT</td>
+                <td class="col-constraint"><span class="constraint-badge badge-pk">PK</span><span class="constraint-badge badge-fk">FK</span></td>
+                <td class="col-desc">项目ID→projects</td>
+            </tr>
+            <tr>
+                <td class="col-name pk fk">tag_id</td>
+                <td class="col-type">BIGINT</td>
+                <td class="col-constraint"><span class="constraint-badge badge-pk">PK</span><span class="constraint-badge badge-fk">FK</span></td>
+                <td class="col-desc">标签ID→tags</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 8. 消息表 messages -->
+    <div class="table-card">
+        <div class="table-header">messages（消息表）</div>
+        <table class="table-content">
+            <tr>
+                <th class="col-name">字段名</th>
+                <th class="col-type">类型</th>
+                <th class="col-constraint">约束</th>
+                <th class="col-desc">说明</th>
+            </tr>
+            <tr>
+                <td class="col-name pk">id</td>
+                <td class="col-type">BIGINT</td>
+                <td class="col-constraint"><span class="constraint-badge badge-pk">PK</span></td>
+                <td class="col-desc">主键，自增</td>
+            </tr>
+            <tr>
+                <td class="col-name">name</td>
+                <td class="col-type">VARCHAR(100)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">发送者姓名</td>
+            </tr>
+            <tr>
+                <td class="col-name">email</td>
+                <td class="col-type">VARCHAR(100)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">发送者邮箱</td>
+            </tr>
+            <tr>
+                <td class="col-name">subject</td>
+                <td class="col-type">VARCHAR(200)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">消息主题</td>
+            </tr>
+            <tr>
+                <td class="col-name">content</td>
+                <td class="col-type">TEXT</td>
+                <td class="col-constraint"><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">消息内容</td>
+            </tr>
+            <tr>
+                <td class="col-name">is_read</td>
+                <td class="col-type">BOOLEAN</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">是否已读</td>
+            </tr>
+            <tr>
+                <td class="col-name">is_replied</td>
+                <td class="col-type">BOOLEAN</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">是否已回复</td>
+            </tr>
+            <tr>
+                <td class="col-name">replied_at</td>
+                <td class="col-type">TIMESTAMP</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">回复时间</td>
+            </tr>
+            <tr>
+                <td class="col-name">ip_address</td>
+                <td class="col-type">VARCHAR(45)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">IP地址</td>
+            </tr>
+            <tr>
+                <td class="col-name">created_at</td>
+                <td class="col-type">TIMESTAMP</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">创建时间</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 9. 系统配置表 site_configs -->
+    <div class="table-card">
+        <div class="table-header">site_configs（系统配置表）</div>
+        <table class="table-content">
+            <tr>
+                <th class="col-name">字段名</th>
+                <th class="col-type">类型</th>
+                <th class="col-constraint">约束</th>
+                <th class="col-desc">说明</th>
+            </tr>
+            <tr>
+                <td class="col-name pk">config_key</td>
+                <td class="col-type">VARCHAR(100)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-pk">PK</span></td>
+                <td class="col-desc">配置键(主键)</td>
+            </tr>
+            <tr>
+                <td class="col-name">config_value</td>
+                <td class="col-type">TEXT</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">配置值</td>
+            </tr>
+            <tr>
+                <td class="col-name">value_type</td>
+                <td class="col-type">VARCHAR(20)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">值类型</td>
+            </tr>
+            <tr>
+                <td class="col-name">description</td>
+                <td class="col-type">VARCHAR(255)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">配置描述</td>
+            </tr>
+            <tr>
+                <td class="col-name">is_public</td>
+                <td class="col-type">BOOLEAN</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">是否公开</td>
+            </tr>
+            <tr>
+                <td class="col-name">updated_at</td>
+                <td class="col-type">TIMESTAMP</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">更新时间</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 10. 访问日志表 visit_logs -->
+    <div class="table-card">
+        <div class="table-header">visit_logs（访问日志表）</div>
+        <table class="table-content">
+            <tr>
+                <th class="col-name">字段名</th>
+                <th class="col-type">类型</th>
+                <th class="col-constraint">约束</th>
+                <th class="col-desc">说明</th>
+            </tr>
+            <tr>
+                <td class="col-name pk">id</td>
+                <td class="col-type">BIGINT</td>
+                <td class="col-constraint"><span class="constraint-badge badge-pk">PK</span></td>
+                <td class="col-desc">主键，自增</td>
+            </tr>
+            <tr>
+                <td class="col-name">path</td>
+                <td class="col-type">VARCHAR(500)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">访问路径</td>
+            </tr>
+            <tr>
+                <td class="col-name">referrer</td>
+                <td class="col-type">VARCHAR(500)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">来源页面</td>
+            </tr>
+            <tr>
+                <td class="col-name">ip_address</td>
+                <td class="col-type">VARCHAR(45)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">IP地址</td>
+            </tr>
+            <tr>
+                <td class="col-name">user_agent</td>
+                <td class="col-type">VARCHAR(500)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">用户代理</td>
+            </tr>
+            <tr>
+                <td class="col-name">country</td>
+                <td class="col-type">VARCHAR(50)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">访问国家</td>
+            </tr>
+            <tr>
+                <td class="col-name">device_type</td>
+                <td class="col-type">VARCHAR(20)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">设备类型</td>
+            </tr>
+            <tr>
+                <td class="col-name">visited_at</td>
+                <td class="col-type">TIMESTAMP</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">访问时间</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 11. 经历表 experiences -->
+    <div class="table-card">
+        <div class="table-header">experiences（经历表）</div>
+        <table class="table-content">
+            <tr>
+                <th class="col-name">字段名</th>
+                <th class="col-type">类型</th>
+                <th class="col-constraint">约束</th>
+                <th class="col-desc">说明</th>
+            </tr>
+            <tr>
+                <td class="col-name pk">id</td>
+                <td class="col-type">BIGINT</td>
+                <td class="col-constraint"><span class="constraint-badge badge-pk">PK</span></td>
+                <td class="col-desc">主键，自增</td>
+            </tr>
+            <tr>
+                <td class="col-name">type</td>
+                <td class="col-type">VARCHAR(20)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">类型(work/education)</td>
+            </tr>
+            <tr>
+                <td class="col-name">title</td>
+                <td class="col-type">VARCHAR(100)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">职位/学位</td>
+            </tr>
+            <tr>
+                <td class="col-name">company</td>
+                <td class="col-type">VARCHAR(100)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">公司/学校</td>
+            </tr>
+            <tr>
+                <td class="col-name">location</td>
+                <td class="col-type">VARCHAR(100)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">地点</td>
+            </tr>
+            <tr>
+                <td class="col-name">start_date</td>
+                <td class="col-type">DATE</td>
+                <td class="col-constraint"><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">开始日期</td>
+            </tr>
+            <tr>
+                <td class="col-name">end_date</td>
+                <td class="col-type">DATE</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">结束日期</td>
+            </tr>
+            <tr>
+                <td class="col-name">description</td>
+                <td class="col-type">TEXT</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">描述</td>
+            </tr>
+            <tr>
+                <td class="col-name">achievements</td>
+                <td class="col-type">JSON</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">成就列表</td>
+            </tr>
+            <tr>
+                <td class="col-name">display_order</td>
+                <td class="col-type">INT</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">显示顺序</td>
+            </tr>
+            <tr>
+                <td class="col-name">is_active</td>
+                <td class="col-type">BOOLEAN</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">是否启用</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 12. 文件资源表 files -->
+    <div class="table-card">
+        <div class="table-header">files（文件资源表）</div>
+        <table class="table-content">
+            <tr>
+                <th class="col-name">字段名</th>
+                <th class="col-type">类型</th>
+                <th class="col-constraint">约束</th>
+                <th class="col-desc">说明</th>
+            </tr>
+            <tr>
+                <td class="col-name pk">id</td>
+                <td class="col-type">BIGINT</td>
+                <td class="col-constraint"><span class="constraint-badge badge-pk">PK</span></td>
+                <td class="col-desc">主键，自增</td>
+            </tr>
+            <tr>
+                <td class="col-name">filename</td>
+                <td class="col-type">VARCHAR(255)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">存储文件名</td>
+            </tr>
+            <tr>
+                <td class="col-name">original_name</td>
+                <td class="col-type">VARCHAR(255)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">原始文件名</td>
+            </tr>
+            <tr>
+                <td class="col-name">mime_type</td>
+                <td class="col-type">VARCHAR(100)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">MIME类型</td>
+            </tr>
+            <tr>
+                <td class="col-name">size</td>
+                <td class="col-type">BIGINT</td>
+                <td class="col-constraint"><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">文件大小(字节)</td>
+            </tr>
+            <tr>
+                <td class="col-name">url</td>
+                <td class="col-type">VARCHAR(500)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">访问URL</td>
+            </tr>
+            <tr>
+                <td class="col-name">storage_provider</td>
+                <td class="col-type">VARCHAR(50)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">存储提供商</td>
+            </tr>
+            <tr>
+                <td class="col-name">storage_path</td>
+                <td class="col-type">VARCHAR(500)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">存储路径</td>
+            </tr>
+            <tr>
+                <td class="col-name fk">uploaded_by</td>
+                <td class="col-type">BIGINT</td>
+                <td class="col-constraint"><span class="constraint-badge badge-fk">FK</span></td>
+                <td class="col-desc">上传者ID→users</td>
+            </tr>
+            <tr>
+                <td class="col-name">created_at</td>
+                <td class="col-type">TIMESTAMP</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">创建时间</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 13. API缓存表 integration_cache -->
+    <div class="table-card">
+        <div class="table-header">integration_cache（API缓存表）</div>
+        <table class="table-content">
+            <tr>
+                <th class="col-name">字段名</th>
+                <th class="col-type">类型</th>
+                <th class="col-constraint">约束</th>
+                <th class="col-desc">说明</th>
+            </tr>
+            <tr>
+                <td class="col-name pk">cache_key</td>
+                <td class="col-type">VARCHAR(100)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-pk">PK</span></td>
+                <td class="col-desc">缓存键(主键)</td>
+            </tr>
+            <tr>
+                <td class="col-name">data</td>
+                <td class="col-type">JSON</td>
+                <td class="col-constraint"><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">缓存数据</td>
+            </tr>
+            <tr>
+                <td class="col-name">last_updated</td>
+                <td class="col-type">TIMESTAMP</td>
+                <td class="col-constraint"><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">最后更新时间</td>
+            </tr>
+            <tr>
+                <td class="col-name">expires_at</td>
+                <td class="col-type">TIMESTAMP</td>
+                <td class="col-constraint"><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">过期时间</td>
+            </tr>
+            <tr>
+                <td class="col-name">ttl_seconds</td>
+                <td class="col-type">INT</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">生存时间(秒)</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 14. 社交链接表 social_links -->
+    <div class="table-card">
+        <div class="table-header">social_links（社交链接表）</div>
+        <table class="table-content">
+            <tr>
+                <th class="col-name">字段名</th>
+                <th class="col-type">类型</th>
+                <th class="col-constraint">约束</th>
+                <th class="col-desc">说明</th>
+            </tr>
+            <tr>
+                <td class="col-name pk">id</td>
+                <td class="col-type">BIGINT</td>
+                <td class="col-constraint"><span class="constraint-badge badge-pk">PK</span></td>
+                <td class="col-desc">主键，自增</td>
+            </tr>
+            <tr>
+                <td class="col-name">platform</td>
+                <td class="col-type">VARCHAR(50)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">平台名称</td>
+            </tr>
+            <tr>
+                <td class="col-name">icon</td>
+                <td class="col-type">VARCHAR(50)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">图标名称</td>
+            </tr>
+            <tr>
+                <td class="col-name">label</td>
+                <td class="col-type">VARCHAR(50)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">显示标签</td>
+            </tr>
+            <tr>
+                <td class="col-name">url</td>
+                <td class="col-type">VARCHAR(255)</td>
+                <td class="col-constraint"><span class="constraint-badge badge-nn">NN</span></td>
+                <td class="col-desc">链接地址</td>
+            </tr>
+            <tr>
+                <td class="col-name">username</td>
+                <td class="col-type">VARCHAR(100)</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">用户名</td>
+            </tr>
+            <tr>
+                <td class="col-name">display_order</td>
+                <td class="col-type">INT</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">显示顺序</td>
+            </tr>
+            <tr>
+                <td class="col-name">is_active</td>
+                <td class="col-type">BOOLEAN</td>
+                <td class="col-constraint"></td>
+                <td class="col-desc">是否启用</td>
+            </tr>
+        </table>
+    </div>
+
+</div>
+
+<div style="text-align: center; margin-top: 30px; font-size: 12px; color: #666;">
+    <p><strong>约束说明：</strong>
+        <span class="constraint-badge badge-pk" style="font-size: 10px;">PK</span> 主键 &nbsp;
+        <span class="constraint-badge badge-fk" style="font-size: 10px;">FK</span> 外键 &nbsp;
+        <span class="constraint-badge badge-uk" style="font-size: 10px;">UK</span> 唯一 &nbsp;
+        <span class="constraint-badge badge-nn" style="font-size: 10px;">NN</span> 非空
+    </p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,19 @@
+# 环境变量（含密码，绝不提交）
+.env
+tech-portal-frontend/.env.local
+
+# macOS
+.DS_Store
+
+# Frontend
+tech-portal-frontend/node_modules/
+tech-portal-frontend/dist/
+
+# Backend
+tech-portal-backend/target/
+tech-portal-backend/*.log
+
+# IDE
+.vscode/settings.json
+.idea/
+*.iml

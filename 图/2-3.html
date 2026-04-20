@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图 2-3 ORM 对象关系映射原理示意图</title>
+    <style>
+        :root {
+            --java-color: #f97316; /* Orange */
+            --db-color: #3b82f6; /* Blue */
+            --orm-color: #10b981; /* Green */
+            --bg-color: #f8fafc;
+            --border-color: #cbd5e1;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .diagram-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            width: 900px;
+            position: relative;
+        }
+
+        .diagram-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #1e293b;
+            margin-top: 35px;
+            margin-bottom: 0;
+        }
+
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 1fr 180px 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+
+        /* Domain Areas */
+        .domain-box {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            background-color: #f8fafc;
+            position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .domain-title {
+            text-align: center;
+            font-weight: bold;
+            color: #475569;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* Entity Cards (Java) */
+        .entity-card {
+            background-color: white;
+            border-left: 4px solid var(--java-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background-color: #fff7ed;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #9a3412;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .code-block {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 10px 12px;
+            font-family: 'Consolas', monospace;
+            font-size: 11px;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .keyword { color: #c084fc; } /* purple for annotations */
+        .type { color: #60a5fa; } /* blue for types */
+        .var { color: #e2e8f0; } /* white for vars */
+
+        /* Table Cards (DB) */
+        .table-card {
+            background-color: white;
+            border-left: 4px solid var(--db-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-radius: 4px;
+        }
+
+        .table-header {
+            background-color: #eff6ff;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #1e40af;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .table-schema {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        .table-schema td {
+            padding: 6px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+        }
+
+        .table-schema tr:last-child td { border-bottom: none; }
+        .pk-icon { color: #eab308; margin-right: 4px; }
+        .fk-icon { color: #94a3b8; margin-right: 4px; font-size: 10px; }
+
+        /* Middle ORM Section */
+        .orm-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            position: relative;
+        }
+
+        .orm-engine {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
+            z-index: 2;
+        }
+
+        .action-arrow {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            position: relative;
+            font-size: 10px;
+            color: #64748b;
+        }
+
+        .arrow-text {
+            background: white;
+            padding: 2px 5px;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+            z-index: 1;
+            font-weight: 500;
+        }
+
+        /* Mapping Lines */
+        .mapping-line {
+            position: absolute;
+            height: 1px;
+            background-color: #cbd5e1;
+            width: 100%;
+            top: 50%;
+            z-index: 0;
+            border-top: 1px dashed #94a3b8;
+        }
+
+        .arrow-head-right {
+            width: 0; height: 0; border-top: 4px solid transparent; border-bottom: 4px solid transparent; border-left: 6px solid #94a3b8;
+            position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+        }
+        
+        .arrow-head-left {
+            width: 0; height: 0; border-top: 4px solid transparent; border-bottom: 4px solid transparent; border-right: 6px solid #94a3b8;
+            position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="diagram-container">
+    
+    <div class="layout-grid">
+        
+        <!-- Java Domain -->
+        <div class="domain-box">
+            <div class="domain-title">
+                <span style="color:var(--java-color)">☕</span> Java Object Layer
+            </div>
+            
+            <!-- User Entity -->
+            <div class="entity-card">
+                <div class="card-header">User.java</div>
+                <div class="code-block">
+                    <span class="keyword">@Entity</span><br>
+                    <span class="keyword">@Table</span>(name="users")<br>
+                    class <span class="type">User</span> {<br>
+                    &nbsp;&nbsp;<span class="keyword">@Id</span> Long <span class="var">id</span>;<br>
+                    &nbsp;&nbsp;String <span class="var">username</span>;<br>
+                    &nbsp;&nbsp;<span class="keyword">@OneToMany</span><br>
+                    &nbsp;&nbsp;List&lt;Post&gt; <span class="var">posts</span>;<br>
+                    }
+                </div>
+            </div>
+
+            <!-- Post Entity -->
+            <div class="entity-card">
+                <div class="card-header">Post.java</div>
+                <div class="code-block">
+                    <span class="keyword">@Entity</span><br>
+                    class <span class="type">Post</span> {<br>
+                    &nbsp;&nbsp;<span class="keyword">@Id</span> Long <span class="var">id</span>;<br>
+                    &nbsp;&nbsp;String <span class="var">title</span>;<br>
+                    &nbsp;&nbsp;<span class="keyword">@ManyToOne</span><br>
+                    &nbsp;&nbsp;<span class="keyword">@JoinColumn</span>("user_id")<br>
+                    &nbsp;&nbsp;User <span class="var">author</span>;<br>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- ORM Engine -->
+        <div class="orm-section">
+            
+            <!-- Top Mapping Flow -->
+            <div class="action-arrow">
+                <div class="arrow-head-left"></div>
+                <div class="mapping-line"></div>
+                <div class="arrow-head-right"></div>
+            </div>
+
+            <div class="orm-engine">
+                <div style="margin-bottom:4px; font-size:16px;">🌱</div>
+                Spring Data<br>JPA<br>
+                <span style="font-weight:normal; font-size:10px; opacity:0.9;">(Hibernate)</span>
+            </div>
+
+            <div class="table-schema" style="text-align:center; color:#64748b; margin-top:10px;">
+                <div class="arrow-text">Mapping & Reflection</div>
+                <div style="height:20px; border-left:1px dashed #cbd5e1; margin:0 auto;"></div>
+                <div class="arrow-text">SQL Generation</div>
+            </div>
+
+            <!-- Bottom Mapping Flow -->
+            <div class="action-arrow">
+                <div class="arrow-head-left"></div>
+                <div class="mapping-line"></div>
+                <div class="arrow-head-right"></div>
+            </div>
+
+        </div>
+
+        <!-- Database Domain -->
+        <div class="domain-box">
+            <div class="domain-title">
+                <span style="color:var(--db-color)">🗄️</span> Database Layer
+            </div>
+            
+            <!-- Users Table -->
+            <div class="table-card">
+                <div class="table-header">Table: users</div>
+                <table class="table-schema">
+                    <tr>
+                        <td><span class="pk-icon">🔑</span>id</td>
+                        <td>BIGINT</td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;&nbsp;&nbsp;username</td>
+                        <td>VARCHAR(50)</td>
+                    </tr>
+                    <tr>
+                        <td style="color:#94a3b8; font-style:italic;">...</td>
+                        <td>...</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Posts Table -->
+            <div class="table-card">
+                <div class="table-header">Table: posts</div>
+                <table class="table-schema">
+                    <tr>
+                        <td><span class="pk-icon">🔑</span>id</td>
+                        <td>BIGINT</td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;&nbsp;&nbsp;title</td>
+                        <td>VARCHAR(255)</td>
+                    </tr>
+                    <tr style="background-color:#eff6ff;">
+                        <td><span class="fk-icon">🔗</span>user_id</td>
+                        <td>BIGINT (FK)</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <p class="diagram-title">图 2-3 ORM 对象关系映射原理示意图</p>
+</div>
+
+</body>
+</html>
